@@ -1,0 +1,36 @@
+version : '3'
+
+services:
+    lb:
+        container_name: lb
+        image: haproxy:2.9
+        ports:
+            - "9999:9999"
+        volumes:
+            - ./config/haproxy:/usr/local/etc/haproxy
+    app_1:
+        container_name: app_1
+        image: nginx:alpine #TODO: replace with the app image
+        environment:
+            - APPPORT=8081
+        ports:
+            - "8081:80"
+    app_2:
+        container_name: app_2
+        image: nginx:alpine #TODO: replace with the app image
+        environment:
+            - APPPORT=8082
+        ports:
+            - "8082:80"
+    db:
+      container_name: db
+      image: alpine:3.19
+      volumes:
+        - ./database:/data
+      command: sh -c "apk --no-cache add sqlite && sqlite3 /data/database.db"
+
+networks:
+  default:
+    driver: bridge 
+
+# https://github.com/zanfranceschi/rinha-de-backend-2024-q1/tree/main#arquitetura
