@@ -15,13 +15,13 @@ var routeCustomers = []Route{
 	{
 		URI:                     "/clientes/{id}/extrato",
 		Method:                  http.MethodGet,
-		Function:                controller.GetStatementByCustomerId,
+		Function:                controller.GetCompleteStatementByCustomerId,
 		RequireAuthentification: false,
 	},
 	{
-		URI:    "/clientes/{id}/transacoes",
-		Method: http.MethodPost,
-		// Function:                controller.PostTransaction,
+		URI:                     "/clientes/{id}/transacoes",
+		Method:                  http.MethodPost,
+		Function:                controller.PostTransactionByCustomerId,
 		RequireAuthentification: false,
 	},
 }

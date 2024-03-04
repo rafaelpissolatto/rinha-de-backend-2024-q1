@@ -1,56 +1,58 @@
 package model
 
-import "errors"
+import (
+	"errors"
+	"log"
+)
 
 // Transaction represents a transaction
 type Transaction struct {
-	ID           uint   `json:"-"` // hiden field in json
-	CustomerID   uint   `json:"-"` // hiden field in json
+	ID           int    `json:"-"` // hiden field in json
+	CustomerID   int    `json:"-"` // hiden field in json
 	Amount       int    `json:"valor"`
 	OperatorType string `json:"tipo"`
 	Description  string `json:"descricao"`
-	CreatedAt    string `json:"criado_em"`
+	CreatedAt    string `json:"realizada_em"`
 }
 
-// validate validates the transaction
-func (t *Transaction) validate() error {
-	switch OperatorType {
-	case "c": //credit
-		if t.CustomerID == 0 {
-			return errors.New("customer_id is required")
-		}
-		if t.Amount == 0 {
-			return errors.New("amount is required")
-		}
-		if t.OperatorType == "" {
-			return errors.New("operator_type is required")
-		}
-		if t.Description == "" {
-			return errors.New("description is required")
-		}
-		if t.Amount < 
+// TransactionResponse represents a transaction response
+type TransactionResponse struct {
+	Limit   int `json:"limite"`
+	Balance int `json:"saldo"`
+}
 
+// validate validates the transaction according to the operator type
+func (t *Transaction) validate() error {
+	switch t.OperatorType {
+	case "c": //credit
+		if t.Amount < 0 {
+			return errors.New("amount must be greater than or equal to zero")
+		}
 	case "d": //debit
-		if t.CustomerID == 0 {
-			return errors.New("customer_id is required")
+		if t.Amount < 0 {
+			return errors.New("amount must be greater than or equal to zero")
 		}
-		if t.Amount == 0 {
-			return errors.New("amount is required")
-		}
-		if t.OperatorType == "" {
-			return errors.New("operator_type is required")
-		}
-		if t.Description == "" {
-			return errors.New("description is required")
-		}
+	default:
+		log.Println("[WARN] Invalid operator type")
+		return errors.New("invalid operator type")
+	}
+
+	if t.Description == "" || len(t.Description) > 10 {
+		log.Println("[WARN] Description cannot be empty or greater than 10 characters")
+		return errors.New("description cannot be empty or greater than 10 characters")
+	}
+
+	if t.CustomerID == 0 {
+		log.Println("[WARN] Customer ID cannot be empty")
+		return errors.New("customer id cannot be empty")
 	}
 
 	return nil
 }
 
 // Prepare prepares the transaction to be saved
-func (t *Transaction) Prepare(step string) error {
-	if err := t.validate(step); err != nil {
+func (t *Transaction) Prepare() error {
+	if err := t.validate(); err != nil {
 		return err
 	}
 

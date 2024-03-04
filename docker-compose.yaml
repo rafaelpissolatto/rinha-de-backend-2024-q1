@@ -8,29 +8,86 @@ services:
             - "9999:9999"
         volumes:
             - ./config/haproxy:/usr/local/etc/haproxy
+        depends_on:
+            - app_1
+            - db
+            # - app_2
+        ulimits:
+            nofile:
+                soft: 1000000
+                hard: 1000000
+        deploy:
+            resources:
+                limits:
+                    cpus: "0.166"
+                    memory: "183MB"
     app_1:
         container_name: app_1
-        image: nginx:alpine #TODO: replace with the app image
+        # image: nginx:alpine #TODO: replace with the app image
+        build:
+            context: ./
+            dockerfile: Dockerfile
         environment:
             - APPPORT=8081
         ports:
+            # - "8081:80"
             - "8081:80"
-    app_2:
-        container_name: app_2
-        image: nginx:alpine #TODO: replace with the app image
-        environment:
-            - APPPORT=8082
-        ports:
-            - "8082:80"
+        env_file:
+            - .env
+        ulimits:
+            nofile:
+                soft: 1000000
+                hard: 1000000
+        deploy:
+            resources:
+                limits:
+                    cpus: "0.166"
+                    memory: "183MB"
+    # app_2:
+    #     container_name: app_2
+    #     # image: nginx:alpine #TODO: replace with the app image
+    #     build:
+    #         context: ./
+    #         dockerfile: Dockerfile
+    #     environment:
+    #         - APPPORT=8082
+    #     ports:
+    #         - "8082:80"
+    #     env_file:
+    #         - .env
+    #     ulimits:
+    #         nofile:
+    #             soft: 1000000
+    #             hard: 1000000
+    #     deploy:
+    #         resources:
+    #             limits:
+    #                 cpus: "0.166"
+    #                 memory: "183MB"
     db:
-      container_name: db
-      image: alpine:3.19
-      volumes:
-        - ./database:/data
-      command: sh -c "apk --no-cache add sqlite && sqlite3 /data/database.db"
+        container_name: db
+        image: alpine:3.19
+        volumes:
+            # - ./database:/data
+            - db:/data
+
+        command: sh -c "apk --no-cache add sqlite && sqlite3 /data/database.db"
+        ulimits:
+            nofile:
+                soft: 1000000
+                hard: 1000000
+        deploy:
+            resources:
+                limits:
+                    cpus: "0.166"
+                    memory: "183MB"
 
 networks:
   default:
-    driver: bridge 
+    driver: bridge
+
+volumes:
+    db:
+        driver: local
 
 # https://github.com/zanfranceschi/rinha-de-backend-2024-q1/tree/main#arquitetura
